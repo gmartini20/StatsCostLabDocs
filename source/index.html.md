@@ -3,12 +3,8 @@ title: API Reference
 
 language_tabs: # must be one of https://git.io/vQNgJ
   - shell
-  - ruby
-  - python
-  - javascript
 
 toc_footers:
-  - <a href='#'>Sign Up for a Developer Key</a>
   - <a href='https://github.com/lord/slate'>Documentation Powered by Slate</a>
 
 includes:
@@ -19,221 +15,421 @@ search: true
 
 # Introduction
 
-Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.
+You can use our API to access Suffolk CostLab Telemetry API endpoints, which can get information on project, estimates, line items and session data.
 
-We have language bindings in Shell, Ruby, Python, and JavaScript! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.
-
-This example API documentation page was created with [Slate](https://github.com/lord/slate). Feel free to edit it and use it as a base for your own API's documentation.
+You can view code examples in the dark area to the right.
 
 # Authentication
 
 > To authorize, use this code:
 
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-```
-
 ```shell
 # With shell, you can just pass the correct header with each request
-curl "api_endpoint_here"
-  -H "Authorization: meowmeowmeow"
+curl --header "Content-Type: application/json" \
+  --request POST \
+  --data '{"password":"WhereIsNavarro"}' \
+  "https://statscostlab-api.cleverbuild.biz/api/account/login"
 ```
 
-```javascript
-const kittn = require('kittn');
+> It will return:
 
-let api = kittn.authorize('meowmeowmeow');
+```json
+{
+    "user": {
+        "username": "User",
+        "firstName": "Default",
+        "lastName": "User",
+        "email": "user@costlab.com",
+        "id": "269bcc50-ab51-446b-b8fd-4d1f22ada0a9"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlVzZXIiLCJmaXJzdE5hbWUiOiJEZWZhdWx0IiwibGFzdE5hbWUiOiJVc2VyIiwiZW1haWwiOiJ1c2VyQGNvc3RsYWIuY29tIiwiaWQiOiIyNjliY2M1MC1hYjUxLTQ0NmItYjhmZC00ZDFmMjJhZGEwYTkiLCJhdXRoZW50aWNhdGVkIjp0cnVlLCJpYXQiOjE1MzgxNTk4MTN9.CjjaPqmVdwlLCbg_WV0ycY3KN4ShWcXsAoM1BxwNLOs",
+    "authenticated": true,
+    "twofactor": null,
+    "twofactorPhone": ""
+}
 ```
 
-> Make sure to replace `meowmeowmeow` with your API key.
+We use a default password to authenticate: "WhereIsNavarro"
 
-Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our [developer portal](http://example.com/developers).
+We expects for the returned token to be included in all API requests to the server in a header that looks like the following:
 
-Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:
-
-`Authorization: meowmeowmeow`
+`Authorization: Bearer#Token`
 
 <aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
+You must replace <code>#Token</code> with the returned token.
 </aside>
 
-# Kittens
+# Projects
 
-## Get All Kittens
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get()
-```
+## Get Projects total count
 
 ```shell
-curl "http://example.com/api/kittens"
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let kittens = api.kittens.get();
+curl "https://statscostlab-api.cleverbuild.biz/api/projects/total"
+  -H "Authorization: Bearer#Token"
 ```
 
 > The above command returns JSON structured like this:
 
 ```json
-[
-  {
-    "id": 1,
-    "name": "Fluffums",
-    "breed": "calico",
-    "fluffiness": 6,
-    "cuteness": 7
-  },
-  {
-    "id": 2,
-    "name": "Max",
-    "breed": "unknown",
-    "fluffiness": 5,
-    "cuteness": 10
-  }
-]
+{
+    "total": "78"
+}
 ```
 
-This endpoint retrieves all kittens.
+This endpoint retrieves the total number of projects.
 
 ### HTTP Request
 
-`GET http://example.com/api/kittens`
+`GET https://statscostlab-api.cleverbuild.biz/api/projects/total`
+
+## Get Projects summary by date and filter type
+
+```shell
+curl "https://statscostlab-api.cleverbuild.biz/api/projects/summary?startDate=2018-07-30&endDate=2018-09-28&filterType=regions"
+  -H "Authorization: Bearer#Token"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+    "records": [
+        [
+            "Boston",
+            "13"
+        ],
+        [
+            "Miami",
+            "1"
+        ],
+        [
+            "San Francisco",
+            "2"
+        ]
+    ]
+}
+```
+
+This endpoint gets a summary of projects data.
+
+### HTTP Request
+
+`GET https://statscostlab-api.cleverbuild.biz/api/projects/summary`
 
 ### Query Parameters
 
-Parameter | Default | Description
---------- | ------- | -----------
-include_cats | false | If set to true, the result will also include cats.
-available | true | If set to false, the result will include kittens that have already been adopted.
+Parameter  | Required | Description
+---------  | ------- | -----------
+startDate  | true    | Date you want to start filtering your data.
+endDate    | true    | Date you want to stop filtering your data.
+filterType | true    | Attribute you want to use to group your data. Available options are: 'regions', 'sectors', 'owners'
 
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
-</aside>
+# Estimates
 
-## Get a Specific Kitten
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get(2)
-```
+## Get Estimates total count
 
 ```shell
-curl "http://example.com/api/kittens/2"
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.get(2);
+curl "https://statscostlab-api.cleverbuild.biz/api/estimates/total"
+  -H "Authorization: Bearer#Token"
 ```
 
 > The above command returns JSON structured like this:
 
 ```json
 {
-  "id": 2,
-  "name": "Max",
-  "breed": "unknown",
-  "fluffiness": 5,
-  "cuteness": 10
+    "total": "78"
 }
 ```
 
-This endpoint retrieves a specific kitten.
-
-<aside class="warning">Inside HTML code blocks like this one, you can't use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside>
+This endpoint retrieves the total number of estimates.
 
 ### HTTP Request
 
-`GET http://example.com/kittens/<ID>`
+`GET https://statscostlab-api.cleverbuild.biz/api/estimates/total`
 
-### URL Parameters
-
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to retrieve
-
-## Delete a Specific Kitten
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.delete(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.delete(2)
-```
+## Get Estimates summary by date and filter type
 
 ```shell
-curl "http://example.com/api/kittens/2"
-  -X DELETE
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.delete(2);
+curl "https://statscostlab-api.cleverbuild.biz/api/estimates/summary?startDate=2018-07-30&endDate=2018-09-28&filterType=regions"
+  -H "Authorization: Bearer#Token"
 ```
 
 > The above command returns JSON structured like this:
 
 ```json
 {
-  "id": 2,
-  "deleted" : ":("
+    "records": [
+        [
+            "Boston",
+            "22"
+        ],
+        [
+            "Miami",
+            "2"
+        ],
+        [
+            "San Francisco",
+            "2"
+        ]
+    ]
 }
 ```
 
-This endpoint deletes a specific kitten.
+This endpoint gets a summary of estimates data.
 
 ### HTTP Request
 
-`DELETE http://example.com/kittens/<ID>`
+`GET https://statscostlab-api.cleverbuild.biz/api/estimates/summary`
 
-### URL Parameters
+### Query Parameters
 
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to delete
+Parameter  | Required | Description
+---------  | ------- | -----------
+startDate  | true    | Date you want to start filtering your data.
+endDate    | true    | Date you want to stop filtering your data.
+filterType | true    | Attribute you want to use to group your data. Available options are: 'regions', 'sectors', 'owners', 'highlevels'
 
+# Line Items
+
+## Get Line Items total count
+
+```shell
+curl "https://statscostlab-api.cleverbuild.biz/api/line_items/total"
+  -H "Authorization: Bearer#Token"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+    "total": "78"
+}
+```
+
+This endpoint retrieves the total number of line items.
+
+### HTTP Request
+
+`GET https://statscostlab-api.cleverbuild.biz/api/line_items/total`
+
+## Get Line Items summary by date and filter type
+
+```shell
+curl "https://statscostlab-api.cleverbuild.biz/api/line_items/summary?startDate=2018-07-30&endDate=2018-09-28&filterType=regions"
+  -H "Authorization: Bearer#Token"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+    "records": [
+        [
+            "Boston",
+            "1841"
+        ],
+        [
+            "Miami",
+            "423"
+        ],
+        [
+            "San Francisco",
+            "435"
+        ]
+    ]
+}
+```
+
+This endpoint gets a summary of line items data.
+
+### HTTP Request
+
+`GET https://statscostlab-api.cleverbuild.biz/api/line_items/summary`
+
+### Query Parameters
+
+Parameter  | Required | Description
+---------  | ------- | -----------
+startDate  | true    | Date you want to start filtering your data.
+endDate    | true    | Date you want to stop filtering your data.
+filterType | true    | Attribute you want to use to group your data. Available options are: 'regions', 'sectors', 'owners'
+
+# High-level Assemblies
+
+## Get High-level Assemblies total count
+
+```shell
+curl "https://statscostlab-api.cleverbuild.biz/api/high_level_assemblies/total"
+  -H "Authorization: Bearer#Token"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+    "total": "78"
+}
+```
+
+This endpoint retrieves the total number of high-level assemblies.
+
+### HTTP Request
+
+`GET https://statscostlab-api.cleverbuild.biz/api/high_level_assemblies/total`
+
+## Get Line Items summary by date and filter type
+
+```shell
+curl "https://statscostlab-api.cleverbuild.biz/api/high_level_assemblies/summary?startDate=2018-07-30&endDate=2018-09-28&filterType=regions"
+  -H "Authorization: Bearer#Token"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+    "records": [
+        [
+            "Miami",
+            "1"
+        ],
+        [
+            "San Francisco",
+            "1"
+        ],
+        [
+            "Boston",
+            "6"
+        ]
+    ]
+}
+```
+
+This endpoint gets a summary of high-level assemblies data.
+
+### HTTP Request
+
+`GET https://statscostlab-api.cleverbuild.biz/api/high_level_assemblies/summary`
+
+### Query Parameters
+
+Parameter  | Required | Description
+---------  | ------- | -----------
+startDate  | true    | Date you want to start filtering your data.
+endDate    | true    | Date you want to stop filtering your data.
+filterType | true    | Attribute you want to use to group your data. Available options are: 'regions', 'sectors', 'owners'
+
+# Sessions
+
+## Get Sessions total count by event
+
+```shell
+curl "https://statscostlab-api.cleverbuild.biz/api/sessions/total?filterType=login"
+  -H "Authorization: Bearer#Token"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+    "total": 35
+}
+```
+
+This endpoint retrieves the total number of high-level assemblies.
+
+### HTTP Request
+
+`GET https://statscostlab-api.cleverbuild.biz/api/sessions/total`
+
+### Query Parameters
+
+Parameter  | Required | Description
+---------  | ------- | -----------
+filterType | true    | Attribute you want to use to group your data. Available option is: 'login'
+
+## Get Line Items summary by date and filter type
+
+```shell
+curl "https://statscostlab-api.cleverbuild.biz/api/sessions/summary?startDate=2018-09-15&endDate=2018-09-28&filterType=login"
+  -H "Authorization: Bearer#Token"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+    "records": [
+        [
+            "2018-09-15",
+            0
+        ],
+        [
+            "2018-09-16",
+            0
+        ],
+        [
+            "2018-09-17",
+            0
+        ],
+        [
+            "2018-09-18",
+            0
+        ],
+        [
+            "2018-09-19",
+            0
+        ],
+        [
+            "2018-09-20",
+            0
+        ],
+        [
+            "2018-09-21",
+            0
+        ],
+        [
+            "2018-09-22",
+            0
+        ],
+        [
+            "2018-09-23",
+            0
+        ],
+        [
+            "2018-09-24",
+            0
+        ],
+        [
+            "2018-09-25",
+            0
+        ],
+        [
+            "2018-09-26",
+            0
+        ],
+        [
+            "2018-09-27",
+            12
+        ],
+        [
+            "2018-09-28",
+            25
+        ]
+    ]
+}
+```
+
+This endpoint gets a summary of sessions data by day.
+
+### HTTP Request
+
+`GET https://statscostlab-api.cleverbuild.biz/api/sessions/summary`
+
+### Query Parameters
+
+Parameter  | Required | Description
+---------  | ------- | -----------
+startDate  | true    | Date you want to start filtering your data.
+endDate    | true    | Date you want to stop filtering your data.
+filterType | true    | Attribute you want to use to group your data. Available options are: 'regions', 'sectors', 'owners'
