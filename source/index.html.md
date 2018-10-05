@@ -51,7 +51,7 @@ curl --header "Content-Type: application/json" \
 
 We use a default password to authenticate: "WhereIsNavarro"
 
-We expects for the returned token to be included in all API requests to the server in a header that looks like the following:
+We expect for the returned token to be included in all API requests to the server in a header that looks like the following:
 
 `Authorization: Bearer#Token`
 
